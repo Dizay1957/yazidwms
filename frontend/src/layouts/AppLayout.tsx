@@ -74,8 +74,9 @@ export function AppLayout({
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
-  const { language, languageLabels, setLanguage, t } = useI18n();
+  const { direction, language, languageLabels, setLanguage, t } = useI18n();
   const isDesktop = useMediaQuery("(min-width:900px)");
+  const isRtl = direction === "rtl";
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
@@ -113,7 +114,7 @@ export function AppLayout({
           const active = location.pathname === item.path;
           const label = t(item.labelKey);
           return (
-            <Tooltip key={item.path} title={collapsed ? label : ""} placement="right">
+            <Tooltip key={item.path} title={collapsed ? label : ""} placement={isRtl ? "left" : "right"}>
               <ListItemButton
                 component={RouterLink}
                 to={item.path}
@@ -132,12 +133,18 @@ export function AppLayout({
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box sx={{ display: "flex", flexDirection: isRtl ? "row-reverse" : "row", minHeight: "100vh", bgcolor: "background.default" }}>
       <AppBar
         position="fixed"
         color="inherit"
         elevation={0}
-        sx={{ borderBottom: 1, borderColor: "divider", ml: { md: `${drawerWidth}px` }, width: { md: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          ml: { md: isRtl ? 0 : `${drawerWidth}px` },
+          mr: { md: isRtl ? `${drawerWidth}px` : 0 },
+          width: { md: `calc(100% - ${drawerWidth}px)` }
+        }}
       >
         <Toolbar>
           <IconButton edge="start" onClick={() => (isDesktop ? setCollapsed((value) => !value) : setMobileOpen(true))} sx={{ mr: 1 }}>
@@ -169,6 +176,7 @@ export function AppLayout({
       </AppBar>
 
       <Drawer
+        anchor={isRtl ? "right" : "left"}
         variant={isDesktop ? "permanent" : "temporary"}
         open={isDesktop ? true : mobileOpen}
         onClose={() => setMobileOpen(false)}
@@ -176,7 +184,12 @@ export function AppLayout({
         sx={{
           width: { md: drawerWidth },
           flexShrink: 0,
-          "& .MuiDrawer-paper": { width: isDesktop ? drawerWidth : expandedWidth, borderRight: 1, borderColor: "divider" }
+          "& .MuiDrawer-paper": {
+            width: isDesktop ? drawerWidth : expandedWidth,
+            borderRight: isRtl ? 0 : 1,
+            borderLeft: isRtl ? 1 : 0,
+            borderColor: "divider"
+          }
         }}
       >
         {drawer}
