@@ -1,8 +1,9 @@
 import { createTheme } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
-export const buildTheme = (mode: "light" | "dark") =>
+export const buildTheme = (mode: "light" | "dark", direction: "ltr" | "rtl" = "ltr") =>
   createTheme({
+    direction,
     palette: {
       mode,
       primary: {
@@ -20,7 +21,7 @@ export const buildTheme = (mode: "light" | "dark") =>
       borderRadius: 8
     },
     typography: {
-      fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+      fontFamily: "Aptos, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
       h4: { fontWeight: 700 },
       h5: { fontWeight: 700 },
       h6: { fontWeight: 700 }

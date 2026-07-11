@@ -19,6 +19,9 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, Lo
     @EntityGraph(attributePaths = {"items", "items.product", "items.bin", "supplier"})
     Optional<PurchaseOrder> findWithItemsById(Long id);
 
+    @EntityGraph(attributePaths = {"items", "items.product", "items.bin", "supplier"})
+    List<PurchaseOrder> findByDeletedFalseOrderByCreatedAtDesc();
+
     @Query("select p.status, count(p) from PurchaseOrder p where p.deleted = false group by p.status")
     List<Object[]> countByStatusGrouped();
 }

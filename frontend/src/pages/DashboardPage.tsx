@@ -12,10 +12,12 @@ import { StatCard } from "../components/StatCard";
 import { PageHeader } from "../components/PageHeader";
 import { currency, number } from "../utils/format";
 import type { DashboardData } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const toChartRows = (record: Record<string, number>, key: string) => Object.entries(record ?? {}).map(([name, value]) => ({ name, [key]: value }));
 
 export function DashboardPage() {
+  const { t } = useI18n();
   const dashboard = useQuery({
     queryKey: ["dashboard"],
     queryFn: () => unwrap<DashboardData>(api.get("/dashboard"))
@@ -31,21 +33,21 @@ export function DashboardPage() {
 
   return (
     <>
-      <PageHeader title="Dashboard" subtitle="Operational KPIs, order flow, and inventory health." onRefresh={() => dashboard.refetch()} />
+      <PageHeader title={t("dashboard.title")} subtitle={t("dashboard.subtitle")} onRefresh={() => dashboard.refetch()} />
       {dashboard.isLoading && <LinearProgress sx={{ mb: 2 }} />}
       {dashboard.error && <Alert severity="error" sx={{ mb: 2 }}>{apiMessage(dashboard.error)}</Alert>}
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Products" value={number(data?.totalProducts)} icon={<Inventory2OutlinedIcon />} /></Grid>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Warehouses" value={number(data?.totalWarehouses)} icon={<WarehouseOutlinedIcon />} tone="secondary" /></Grid>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Suppliers" value={number(data?.totalSuppliers)} icon={<LocalShippingOutlinedIcon />} tone="success" /></Grid>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Customers" value={number(data?.totalCustomers)} icon={<GroupsOutlinedIcon />} tone="secondary" /></Grid>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Inventory Value" value={currency(data?.inventoryValue)} icon={<PaidOutlinedIcon />} tone="success" /></Grid>
-        <Grid item xs={12} sm={6} lg={2}><StatCard label="Low Stock" value={number(data?.lowStockProducts)} icon={<WarningAmberOutlinedIcon />} tone="warning" /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.products")} value={number(data?.totalProducts)} icon={<Inventory2OutlinedIcon />} /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.warehouses")} value={number(data?.totalWarehouses)} icon={<WarehouseOutlinedIcon />} tone="secondary" /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.suppliers")} value={number(data?.totalSuppliers)} icon={<LocalShippingOutlinedIcon />} tone="success" /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.customers")} value={number(data?.totalCustomers)} icon={<GroupsOutlinedIcon />} tone="secondary" /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.inventoryValue")} value={currency(data?.inventoryValue)} icon={<PaidOutlinedIcon />} tone="success" /></Grid>
+        <Grid item xs={12} sm={6} lg={2}><StatCard label={t("dashboard.lowStock")} value={number(data?.lowStockProducts)} icon={<WarningAmberOutlinedIcon />} tone="warning" /></Grid>
 
         <Grid item xs={12} lg={7}>
           <Card>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Monthly Sales and Purchases</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>{t("dashboard.monthlySales")}</Typography>
               <Box sx={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={salesPurchase}>
@@ -65,7 +67,7 @@ export function DashboardPage() {
         <Grid item xs={12} lg={5}>
           <Card>
             <CardContent>
-              <Typography variant="h6" sx={{ mb: 2 }}>Inventory Activity</Typography>
+              <Typography variant="h6" sx={{ mb: 2 }}>{t("dashboard.inventoryActivity")}</Typography>
               <Box sx={{ height: 320 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={activity}>
@@ -81,10 +83,10 @@ export function DashboardPage() {
           </Card>
         </Grid>
         <Grid item xs={12} md={6}>
-          <StatusPanel title="Purchase Orders" rows={data?.purchaseOrdersByStatus ?? {}} />
+          <StatusPanel title={t("dashboard.purchaseOrders")} rows={data?.purchaseOrdersByStatus ?? {}} />
         </Grid>
         <Grid item xs={12} md={6}>
-          <StatusPanel title="Sales Orders" rows={data?.salesOrdersByStatus ?? {}} />
+          <StatusPanel title={t("dashboard.salesOrders")} rows={data?.salesOrdersByStatus ?? {}} />
         </Grid>
       </Grid>
     </>
@@ -92,12 +94,13 @@ export function DashboardPage() {
 }
 
 function StatusPanel({ title, rows }: { title: string; rows: Record<string, number> }) {
+  const { t } = useI18n();
   return (
     <Card>
       <CardContent>
         <Typography variant="h6" sx={{ mb: 2 }}>{title}</Typography>
         <Stack spacing={1}>
-          {Object.entries(rows).length === 0 && <Typography color="text.secondary">No order activity yet.</Typography>}
+          {Object.entries(rows).length === 0 && <Typography color="text.secondary">{t("dashboard.noOrderActivity")}</Typography>}
           {Object.entries(rows).map(([status, count]) => (
             <Stack key={status} direction="row" justifyContent="space-between">
               <Typography>{status.replaceAll("_", " ")}</Typography>

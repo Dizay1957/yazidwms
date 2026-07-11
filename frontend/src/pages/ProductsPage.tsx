@@ -8,6 +8,7 @@ import { currency } from "../utils/format";
 import { canManage } from "../utils/permissions";
 import { useAuth } from "../auth/AuthProvider";
 import type { Category, Product, Supplier } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const columns: GridColDef<Product>[] = [
   { field: "sku", headerName: "SKU", width: 150 },
@@ -23,6 +24,7 @@ const columns: GridColDef<Product>[] = [
 
 export function ProductsPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   const categories = useQuery({ queryKey: ["category-options"], queryFn: () => listPage<Category>("/categories", { size: 200 }) });
   const suppliers = useQuery({ queryKey: ["supplier-options"], queryFn: () => listPage<Supplier>("/suppliers", { size: 200 }) });
 
@@ -43,13 +45,13 @@ export function ProductsPage() {
 
   return (
     <EntityPage<Product>
-      title="Products"
-      subtitle="Manage sellable and purchasable warehouse stock keeping units."
+      title={t("entities.products")}
+      subtitle={t("entities.productsSubtitle")}
       endpoint="/products"
       queryKey="products"
       columns={columns}
       fields={fields}
-      createLabel="New product"
+      createLabel={t("entities.newProduct")}
       canWrite={canManage(auth.roles)}
       defaultValues={{ sku: "", barcode: "", name: "", description: "", categoryId: "", supplierId: "", purchasePrice: 0, sellingPrice: 0, unit: "PCS", weight: 0, minimumQuantity: 0, maximumQuantity: 0 }}
       toFormValues={(row) => ({ ...row })}

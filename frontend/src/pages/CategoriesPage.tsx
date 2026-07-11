@@ -7,6 +7,7 @@ import { StatusChip } from "../components/StatusChip";
 import { useAuth } from "../auth/AuthProvider";
 import { canManage } from "../utils/permissions";
 import type { Category } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const columns: GridColDef<Category>[] = [
   { field: "name", headerName: "Category", flex: 1, minWidth: 220 },
@@ -17,6 +18,7 @@ const columns: GridColDef<Category>[] = [
 
 export function CategoriesPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   const categoryOptions = useQuery({ queryKey: ["category-options-all"], queryFn: () => listPage<Category>("/categories", { size: 200 }) });
   const fields: FormField[] = [
     { name: "name", label: "Name", required: true },
@@ -26,13 +28,13 @@ export function CategoriesPage() {
 
   return (
     <EntityPage<Category>
-      title="Categories"
-      subtitle="Maintain product families and category hierarchy."
+      title={t("entities.categories")}
+      subtitle={t("entities.categoriesSubtitle")}
       endpoint="/categories"
       queryKey="categories"
       columns={columns}
       fields={fields}
-      createLabel="New category"
+      createLabel={t("entities.newCategory")}
       canWrite={canManage(auth.roles)}
       defaultValues={{ name: "", description: "", parentId: "" }}
       toFormValues={(row) => ({ name: row.name, description: row.description ?? "", parentId: row.parentId ?? "" })}

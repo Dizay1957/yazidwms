@@ -4,9 +4,11 @@ import { FormEvent, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { apiMessage } from "../api/client";
+import { useI18n } from "../i18n/I18nProvider";
 
 export function LoginPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const location = useLocation();
   const [values, setValues] = useState({ email: "", password: "" });
@@ -40,15 +42,15 @@ export function LoginPage() {
           <Stack spacing={2} alignItems="center" sx={{ mb: 3 }}>
             <Avatar sx={{ bgcolor: "primary.main" }}><LockOutlinedIcon /></Avatar>
             <Box textAlign="center">
-              <Typography variant="h5">Sign in to YazidWMS</Typography>
-              <Typography color="text.secondary">Enterprise warehouse operations console</Typography>
+              <Typography variant="h5">{t("login.title")}</Typography>
+              <Typography color="text.secondary">{t("login.subtitle")}</Typography>
             </Box>
           </Stack>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
           <Stack component="form" spacing={2} onSubmit={submit}>
-            <TextField label="Email" type="email" required value={values.email} onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))} />
-            <TextField label="Password" type="password" required value={values.password} onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))} />
-            <Button type="submit" variant="contained" size="large" disabled={loading}>Login</Button>
+            <TextField label={t("login.email")} type="email" required value={values.email} onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))} />
+            <TextField label={t("login.password")} type="password" required value={values.password} onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))} />
+            <Button type="submit" variant="contained" size="large" disabled={loading}>{t("login.action")}</Button>
           </Stack>
         </CardContent>
       </Card>

@@ -13,11 +13,13 @@ import { PageHeader } from "../../components/PageHeader";
 import { StatusChip } from "../../components/StatusChip";
 import { currency, dateTime } from "../../utils/format";
 import type { Customer, InventoryItem, Product, PurchaseOrder, SalesOrder, Supplier } from "../../types/api";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type OrderKind = "purchase" | "sales";
 type Order = PurchaseOrder | SalesOrder;
 
 export function OrderPage({ kind }: { kind: OrderKind }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -55,7 +57,7 @@ export function OrderPage({ kind }: { kind: OrderKind }) {
     },
     onSuccess: () => {
       setDialogOpen(false);
-      setSnackbar("Order created");
+      setSnackbar(t("entities.orderCreated"));
       queryClient.invalidateQueries({ queryKey: [queryKey] });
     }
   });
@@ -63,7 +65,7 @@ export function OrderPage({ kind }: { kind: OrderKind }) {
   const action = useMutation({
     mutationFn: ({ id, actionName }: { id: number; actionName: string }) => unwrap<Order>(api.patch(`${endpoint}/${id}/${actionName}`)),
     onSuccess: () => {
-      setSnackbar("Order updated");
+      setSnackbar(t("entities.orderUpdated"));
       queryClient.invalidateQueries({ queryKey: [queryKey] });
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -120,11 +122,17 @@ export function OrderPage({ kind }: { kind: OrderKind }) {
     [action, kind]
   );
 
-  const title = kind === "purchase" ? "Purchase Orders" : "Sales Orders";
+  const title = kind === "purchase" ? t("entities.purchaseOrders") : t("entities.salesOrders");
 
   return (
     <>
-      <PageHeader title={title} subtitle={kind === "purchase" ? "Create, confirm, receive, and cancel inbound orders." : "Create, confirm, ship, and cancel outbound orders."} actionLabel={`New ${kind} order`} onAction={() => setDialogOpen(true)} onRefresh={() => orders.refetch()} />
+      <PageHeader
+        title={title}
+        subtitle={kind === "purchase" ? t("entities.purchaseOrdersSubtitle") : t("entities.salesOrdersSubtitle")}
+        actionLabel={kind === "purchase" ? t("entities.newPurchaseOrder") : t("entities.newSalesOrder")}
+        onAction={() => setDialogOpen(true)}
+        onRefresh={() => orders.refetch()}
+      />
       {(create.error || action.error) && <Alert severity="error" sx={{ mb: 2 }}>{apiMessage(create.error ?? action.error)}</Alert>}
       <DataTableShell
         rows={orders.data?.content ?? []}
@@ -134,8 +142,8 @@ export function OrderPage({ kind }: { kind: OrderKind }) {
         total={orders.data?.totalElements ?? 0}
         paginationModel={paginationModel}
         search={search}
-        emptyTitle={`No ${title.toLowerCase()} found`}
-        emptyMessage="Create an order to begin the workflow."
+        emptyTitle={t("entities.noOrders")}
+        emptyMessage={t("entities.noOrdersMessage")}
         onSearch={setSearch}
         onPaginationModelChange={setPaginationModel}
         onSortModelChange={setSortModel}

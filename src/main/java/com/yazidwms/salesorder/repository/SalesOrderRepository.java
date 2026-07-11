@@ -19,6 +19,9 @@ public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
     @EntityGraph(attributePaths = {"items", "items.product", "items.bin", "customer"})
     Optional<SalesOrder> findWithItemsById(Long id);
 
+    @EntityGraph(attributePaths = {"items", "items.product", "items.bin", "customer"})
+    List<SalesOrder> findByDeletedFalseOrderByCreatedAtDesc();
+
     @Query("select s.status, count(s) from SalesOrder s where s.deleted = false group by s.status")
     List<Object[]> countByStatusGrouped();
 }

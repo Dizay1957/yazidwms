@@ -6,6 +6,7 @@ import { FormField, FormValues } from "../components/FormDialog";
 import { StatusChip } from "../components/StatusChip";
 import { dateTime } from "../utils/format";
 import type { Role, User } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const columns: GridColDef<User>[] = [
   { field: "fullName", headerName: "Name", flex: 1, minWidth: 220 },
@@ -17,6 +18,7 @@ const columns: GridColDef<User>[] = [
 ];
 
 export function UsersPage() {
+  const { t } = useI18n();
   const roles = useQuery({ queryKey: ["roles"], queryFn: () => unwrap<Role[]>(api.get("/roles")) });
   const roleOptions = (roles.data ?? []).map((role) => ({ value: role.name, label: role.name.replace(/_/g, " ") }));
   const fields: FormField[] = [
@@ -30,13 +32,13 @@ export function UsersPage() {
 
   return (
     <EntityPage<User>
-      title="User Management"
-      subtitle="Manage users, roles, status, and access boundaries."
+      title={t("entities.users")}
+      subtitle={t("entities.usersSubtitle")}
       endpoint="/users"
       queryKey="users"
       columns={columns}
       fields={fields}
-      createLabel="New user"
+      createLabel={t("entities.newUser")}
       canWrite
       defaultValues={{ fullName: "", email: "", password: "AdminPass1", phone: "", roles: ["VIEWER"], status: "ACTIVE" }}
       toFormValues={(row) => ({ fullName: row.fullName, email: row.email, password: "", phone: row.phone ?? "", roles: row.roles, status: row.status })}

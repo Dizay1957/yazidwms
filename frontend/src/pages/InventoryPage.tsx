@@ -11,8 +11,9 @@ import { FormDialog, FormField, FormValues } from "../components/FormDialog";
 import { PageHeader } from "../components/PageHeader";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import type { InventoryItem } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
-const columns = (onAdjust: (row: InventoryItem) => void, onTransfer: (row: InventoryItem) => void): GridColDef<InventoryItem>[] => [
+const columns = (onAdjust: (row: InventoryItem) => void, onTransfer: (row: InventoryItem) => void, labels: { adjust: string; transfer: string }): GridColDef<InventoryItem>[] => [
   { field: "sku", headerName: "SKU", width: 160 },
   { field: "productName", headerName: "Product", flex: 1, minWidth: 240 },
   { field: "binCode", headerName: "Bin", width: 160 },
@@ -24,14 +25,15 @@ const columns = (onAdjust: (row: InventoryItem) => void, onTransfer: (row: Inven
     sortable: false,
     renderCell: ({ row }) => (
       <Stack direction="row" spacing={1}>
-        <Button size="small" startIcon={<TuneOutlinedIcon />} onClick={() => onAdjust(row)}>Adjust</Button>
-        <Button size="small" startIcon={<SwapHorizOutlinedIcon />} onClick={() => onTransfer(row)}>Transfer</Button>
+        <Button size="small" startIcon={<TuneOutlinedIcon />} onClick={() => onAdjust(row)}>{labels.adjust}</Button>
+        <Button size="small" startIcon={<SwapHorizOutlinedIcon />} onClick={() => onTransfer(row)}>{labels.transfer}</Button>
       </Stack>
     )
   }
 ];
 
 export function InventoryPage() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -59,7 +61,7 @@ export function InventoryPage() {
       })),
     onSuccess: () => {
       setAdjusting(null);
-      setSnackbar("Inventory adjusted");
+      setSnackbar(t("entities.inventoryAdjusted"));
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
     }
   });
@@ -76,7 +78,7 @@ export function InventoryPage() {
       })),
     onSuccess: () => {
       setTransferring(null);
-      setSnackbar("Inventory transferred");
+      setSnackbar(t("entities.inventoryTransferred"));
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
       queryClient.invalidateQueries({ queryKey: ["movements"] });
     }
@@ -88,18 +90,18 @@ export function InventoryPage() {
 
   return (
     <>
-      <PageHeader title="Inventory" subtitle="Review quantities by product and bin, then adjust or transfer controlled stock." onRefresh={() => inventory.refetch()} />
+      <PageHeader title={t("entities.inventory")} subtitle={t("entities.inventorySubtitle")} onRefresh={() => inventory.refetch()} />
       {mutationError && <Alert severity="error" sx={{ mb: 2 }}>{mutationError}</Alert>}
       <DataTableShell
         rows={inventory.data?.content ?? []}
-        columns={columns(setAdjusting, setTransferring)}
+        columns={columns(setAdjusting, setTransferring, { adjust: t("entities.adjust"), transfer: t("entities.transfer") })}
         loading={inventory.isLoading || inventory.isFetching}
         error={error}
         total={inventory.data?.totalElements ?? 0}
         paginationModel={paginationModel}
         search={search}
-        emptyTitle="No inventory found"
-        emptyMessage="Receive purchase orders or seed inventory to create inventory records."
+        emptyTitle={t("entities.noInventory")}
+        emptyMessage={t("entities.noInventoryMessage")}
         onSearch={(value) => {
           setSearch(value);
           setPaginationModel((current) => ({ ...current, page: 0 }));
@@ -110,7 +112,7 @@ export function InventoryPage() {
 
       <FormDialog
         open={Boolean(adjusting)}
-        title="Adjust inventory"
+        title={t("entities.adjustInventory")}
         fields={[
           { name: "newQuantity", label: "New Quantity", type: "number", required: true },
           { name: "reason", label: "Reason", required: true },
@@ -124,7 +126,7 @@ export function InventoryPage() {
 
       <FormDialog
         open={Boolean(transferring)}
-        title="Transfer inventory"
+        title={t("entities.transferInventory")}
         fields={[
           { name: "toBinId", label: "Destination Bin", type: "select", required: true, options: binOptions },
           { name: "quantity", label: "Quantity", type: "number", required: true },

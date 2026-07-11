@@ -5,6 +5,7 @@ import { StatusChip } from "../components/StatusChip";
 import { useAuth } from "../auth/AuthProvider";
 import { canManage } from "../utils/permissions";
 import type { Customer } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const fields: FormField[] = [
   { name: "customerType", label: "Customer Type", type: "select", required: true, options: ["COMPANY", "INDIVIDUAL"].map((value) => ({ value, label: value })) },
@@ -29,15 +30,16 @@ const columns: GridColDef<Customer>[] = [
 
 export function CustomersPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   return (
     <EntityPage<Customer>
-      title="Customers"
-      subtitle="Maintain customers used in outbound sales order workflows."
+      title={t("entities.customers")}
+      subtitle={t("entities.customersSubtitle")}
       endpoint="/customers"
       queryKey="customers"
       columns={columns}
       fields={fields}
-      createLabel="New customer"
+      createLabel={t("entities.newCustomer")}
       canWrite={canManage(auth.roles)}
       defaultValues={{ customerType: "COMPANY", companyName: "", fullName: "", email: "", phone: "", country: "", city: "", address: "", status: "ACTIVE" }}
       toFormValues={(row) => ({ ...row })}

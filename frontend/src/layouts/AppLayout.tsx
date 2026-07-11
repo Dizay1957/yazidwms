@@ -35,6 +35,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import TranslateOutlinedIcon from "@mui/icons-material/TranslateOutlined";
 import { PropsWithChildren, useMemo, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -42,26 +43,27 @@ import { api, unwrap } from "../api/client";
 import { useAuth } from "../auth/AuthProvider";
 import { hasAnyRole } from "../utils/permissions";
 import type { DashboardData, RoleName } from "../types/api";
+import { Language, useI18n } from "../i18n/I18nProvider";
 
 const expandedWidth = 260;
 const collapsedWidth = 74;
 
-type NavItem = { label: string; path: string; icon: React.ReactNode; roles?: RoleName[] };
+type NavItem = { labelKey: Parameters<ReturnType<typeof useI18n>["t"]>[0]; path: string; icon: React.ReactNode; roles?: RoleName[] };
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", path: "/", icon: <DashboardIcon /> },
-  { label: "Products", path: "/products", icon: <Inventory2OutlinedIcon /> },
-  { label: "Categories", path: "/categories", icon: <CategoryOutlinedIcon /> },
-  { label: "Suppliers", path: "/suppliers", icon: <LocalShippingOutlinedIcon /> },
-  { label: "Customers", path: "/customers", icon: <GroupsOutlinedIcon /> },
-  { label: "Warehouses", path: "/warehouses", icon: <WarehouseOutlinedIcon /> },
-  { label: "Inventory", path: "/inventory", icon: <Inventory2OutlinedIcon /> },
-  { label: "Movements", path: "/movements", icon: <SwapHorizOutlinedIcon /> },
-  { label: "Purchase Orders", path: "/purchase-orders", icon: <ShoppingCartOutlinedIcon /> },
-  { label: "Sales Orders", path: "/sales-orders", icon: <PointOfSaleOutlinedIcon /> },
-  { label: "Reports", path: "/reports", icon: <AssessmentOutlinedIcon />, roles: ["ADMIN", "MANAGER"] },
-  { label: "Users", path: "/users", icon: <PeopleAltOutlinedIcon />, roles: ["ADMIN"] },
-  { label: "Settings", path: "/settings", icon: <SettingsOutlinedIcon /> }
+  { labelKey: "nav.dashboard", path: "/", icon: <DashboardIcon /> },
+  { labelKey: "nav.products", path: "/products", icon: <Inventory2OutlinedIcon /> },
+  { labelKey: "nav.categories", path: "/categories", icon: <CategoryOutlinedIcon /> },
+  { labelKey: "nav.suppliers", path: "/suppliers", icon: <LocalShippingOutlinedIcon /> },
+  { labelKey: "nav.customers", path: "/customers", icon: <GroupsOutlinedIcon /> },
+  { labelKey: "nav.warehouses", path: "/warehouses", icon: <WarehouseOutlinedIcon /> },
+  { labelKey: "nav.inventory", path: "/inventory", icon: <Inventory2OutlinedIcon /> },
+  { labelKey: "nav.movements", path: "/movements", icon: <SwapHorizOutlinedIcon /> },
+  { labelKey: "nav.purchaseOrders", path: "/purchase-orders", icon: <ShoppingCartOutlinedIcon /> },
+  { labelKey: "nav.salesOrders", path: "/sales-orders", icon: <PointOfSaleOutlinedIcon /> },
+  { labelKey: "nav.reports", path: "/reports", icon: <AssessmentOutlinedIcon />, roles: ["ADMIN", "MANAGER"] },
+  { labelKey: "nav.users", path: "/users", icon: <PeopleAltOutlinedIcon />, roles: ["ADMIN"] },
+  { labelKey: "nav.settings", path: "/settings", icon: <SettingsOutlinedIcon /> }
 ];
 
 export function AppLayout({
@@ -72,11 +74,13 @@ export function AppLayout({
   const location = useLocation();
   const navigate = useNavigate();
   const auth = useAuth();
+  const { language, languageLabels, setLanguage, t } = useI18n();
   const isDesktop = useMediaQuery("(min-width:900px)");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
+  const [languageAnchor, setLanguageAnchor] = useState<null | HTMLElement>(null);
 
   const visibleItems = useMemo(() => navItems.filter((item) => hasAnyRole(auth.roles, item.roles)), [auth.roles]);
   const drawerWidth = collapsed ? collapsedWidth : expandedWidth;
@@ -97,8 +101,8 @@ export function AppLayout({
           <Avatar sx={{ width: 34, height: 34, bgcolor: "primary.main", fontWeight: 800 }}>Y</Avatar>
           {!collapsed && (
             <Box>
-              <Typography variant="subtitle1" fontWeight={800}>YazidWMS</Typography>
-              <Typography variant="caption" color="text.secondary">Enterprise warehouse suite</Typography>
+              <Typography variant="subtitle1" fontWeight={800}>{t("app.name")}</Typography>
+              <Typography variant="caption" color="text.secondary">{t("app.tagline")}</Typography>
             </Box>
           )}
         </Stack>
@@ -107,8 +111,9 @@ export function AppLayout({
       <List sx={{ px: 1, py: 1, flex: 1 }}>
         {visibleItems.map((item) => {
           const active = location.pathname === item.path;
+          const label = t(item.labelKey);
           return (
-            <Tooltip key={item.path} title={collapsed ? item.label : ""} placement="right">
+            <Tooltip key={item.path} title={collapsed ? label : ""} placement="right">
               <ListItemButton
                 component={RouterLink}
                 to={item.path}
@@ -117,7 +122,7 @@ export function AppLayout({
                 onClick={() => setMobileOpen(false)}
               >
                 <ListItemIcon sx={{ minWidth: collapsed ? 0 : 40, color: active ? "primary.main" : "text.secondary" }}>{item.icon}</ListItemIcon>
-                {!collapsed && <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: 14, fontWeight: active ? 700 : 500 }} />}
+                {!collapsed && <ListItemText primary={label} primaryTypographyProps={{ fontSize: 14, fontWeight: active ? 700 : 500 }} />}
               </ListItemButton>
             </Tooltip>
           );
@@ -139,17 +144,22 @@ export function AppLayout({
             <MenuIcon />
           </IconButton>
           <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle1" fontWeight={800}>Operations Console</Typography>
-            <Typography variant="caption" color="text.secondary">Live WMS controls connected to Spring Boot API</Typography>
+            <Typography variant="subtitle1" fontWeight={800}>{t("app.console")}</Typography>
+            <Typography variant="caption" color="text.secondary">{t("app.consoleSubtitle")}</Typography>
           </Box>
-          <Tooltip title="Notifications">
+          <Tooltip title={t("common.notifications")}>
             <IconButton onClick={(event) => setNotificationAnchor(event.currentTarget)}>
               <Badge badgeContent={lowStockCount} color="warning">
                 <NotificationsOutlinedIcon />
               </Badge>
             </IconButton>
           </Tooltip>
-          <Tooltip title={mode === "light" ? "Switch to dark mode" : "Switch to light mode"}>
+          <Tooltip title={t("common.language")}>
+            <IconButton onClick={(event) => setLanguageAnchor(event.currentTarget)}>
+              <TranslateOutlinedIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={mode === "light" ? t("common.darkMode") : t("common.lightMode")}>
             <IconButton onClick={onToggleMode}>{mode === "light" ? <DarkModeOutlinedIcon /> : <LightModeOutlinedIcon />}</IconButton>
           </Tooltip>
           <IconButton onClick={(event) => setProfileAnchor(event.currentTarget)}>
@@ -178,7 +188,7 @@ export function AppLayout({
 
       <Menu anchorEl={profileAnchor} open={Boolean(profileAnchor)} onClose={() => setProfileAnchor(null)}>
         <MenuItem disabled>{auth.profile?.fullName ?? auth.user?.email}</MenuItem>
-        <MenuItem onClick={() => { setProfileAnchor(null); navigate("/settings"); }}>Profile settings</MenuItem>
+        <MenuItem onClick={() => { setProfileAnchor(null); navigate("/settings"); }}>{t("common.profileSettings")}</MenuItem>
         <MenuItem
           onClick={async () => {
             setProfileAnchor(null);
@@ -187,14 +197,29 @@ export function AppLayout({
           }}
         >
           <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
-          Logout
+          {t("common.logout")}
         </MenuItem>
       </Menu>
 
+      <Menu anchorEl={languageAnchor} open={Boolean(languageAnchor)} onClose={() => setLanguageAnchor(null)}>
+        {(Object.keys(languageLabels) as Language[]).map((option) => (
+          <MenuItem
+            key={option}
+            selected={language === option}
+            onClick={() => {
+              setLanguage(option);
+              setLanguageAnchor(null);
+            }}
+          >
+            {languageLabels[option]}
+          </MenuItem>
+        ))}
+      </Menu>
+
       <Menu anchorEl={notificationAnchor} open={Boolean(notificationAnchor)} onClose={() => setNotificationAnchor(null)}>
-        <MenuItem disabled>Notifications</MenuItem>
+        <MenuItem disabled>{t("common.notifications")}</MenuItem>
         <MenuItem onClick={() => { setNotificationAnchor(null); navigate("/products"); }}>
-          {lowStockCount > 0 ? `${lowStockCount} products are below minimum stock` : "No low-stock alerts"}
+          {lowStockCount > 0 ? t("common.lowStockAlert", { count: lowStockCount }) : t("common.noLowStock")}
         </MenuItem>
       </Menu>
     </Box>

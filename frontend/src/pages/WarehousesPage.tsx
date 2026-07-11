@@ -11,6 +11,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { canManage } from "../utils/permissions";
 import { PageHeader } from "../components/PageHeader";
 import type { Bin, LocationNode, Warehouse } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const fields: FormField[] = [
   { name: "code", label: "Warehouse Code", required: true },
@@ -31,16 +32,17 @@ const columns: GridColDef<Warehouse>[] = [
 
 export function WarehousesPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   return (
     <>
       <EntityPage<Warehouse>
-        title="Warehouses"
-        subtitle="Manage facilities and their physical topology: zones, aisles, shelves, and bins."
+        title={t("entities.warehouses")}
+        subtitle={t("entities.warehousesSubtitle")}
         endpoint="/warehouses"
         queryKey="warehouses"
         columns={columns}
         fields={fields}
-        createLabel="New warehouse"
+        createLabel={t("entities.newWarehouse")}
         canWrite={canManage(auth.roles)}
         defaultValues={{ code: "", name: "", country: "", city: "", address: "" }}
         toFormValues={(row) => ({ code: row.code, name: row.name, country: row.country ?? "", city: row.city ?? "", address: row.address ?? "" })}
@@ -54,6 +56,7 @@ export function WarehousesPage() {
 }
 
 function WarehouseTopology({ canWrite }: { canWrite: boolean }) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [warehouseId, setWarehouseId] = useState<number | null>(null);
   const [zoneId, setZoneId] = useState<number | null>(null);
@@ -93,9 +96,9 @@ function WarehouseTopology({ canWrite }: { canWrite: boolean }) {
   return (
     <>
       <PageHeader
-        title="Warehouse Topology"
-        subtitle="Create and inspect zones, aisles, shelves, and bins with live backend calls."
-        actionLabel={canWrite && warehouseId ? "Add location" : undefined}
+        title={t("entities.topology")}
+        subtitle={t("entities.topologySubtitle")}
+        actionLabel={canWrite && warehouseId ? t("entities.addLocation") : undefined}
         onAction={() => setDialog(zoneId ? (aisleId ? (shelfId ? "bin" : "shelf") : "aisle") : "zone")}
       />
       {create.error && <Alert severity="error" sx={{ mb: 2 }}>{apiMessage(create.error)}</Alert>}

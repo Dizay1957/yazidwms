@@ -8,6 +8,7 @@ import { PageHeader } from "../components/PageHeader";
 import { StatusChip } from "../components/StatusChip";
 import { dateTime } from "../utils/format";
 import type { StockMovement } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const columns: GridColDef<StockMovement>[] = [
   { field: "timestamp", headerName: "Timestamp", width: 190, valueFormatter: (value) => dateTime(value as string) },
@@ -22,6 +23,7 @@ const columns: GridColDef<StockMovement>[] = [
 ];
 
 export function MovementsPage() {
+  const { t } = useI18n();
   const [search, setSearch] = useState("");
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
   const [sortModel, setSortModel] = useState<GridSortModel>([]);
@@ -33,7 +35,7 @@ export function MovementsPage() {
 
   return (
     <>
-      <PageHeader title="Stock Movement History" subtitle="Immutable inbound, outbound, transfer, and adjustment activity." onRefresh={() => movements.refetch()} />
+      <PageHeader title={t("entities.movements")} subtitle={t("entities.movementsSubtitle")} onRefresh={() => movements.refetch()} />
       <DataTableShell
         rows={movements.data?.content ?? []}
         columns={columns}
@@ -42,8 +44,8 @@ export function MovementsPage() {
         total={movements.data?.totalElements ?? 0}
         paginationModel={paginationModel}
         search={search}
-        emptyTitle="No movements found"
-        emptyMessage="Inventory movements will appear after receiving, shipping, adjusting, or transferring stock."
+        emptyTitle={t("entities.noMovements")}
+        emptyMessage={t("entities.noMovementsMessage")}
         onSearch={setSearch}
         onPaginationModelChange={setPaginationModel}
         onSortModelChange={setSortModel}

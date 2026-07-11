@@ -5,6 +5,7 @@ import { StatusChip } from "../components/StatusChip";
 import { useAuth } from "../auth/AuthProvider";
 import { canManage } from "../utils/permissions";
 import type { Supplier } from "../types/api";
+import { useI18n } from "../i18n/I18nProvider";
 
 const statusOptions = ["ACTIVE", "INACTIVE", "BLOCKED"].map((value) => ({ value, label: value }));
 const fields: FormField[] = [
@@ -30,15 +31,16 @@ const columns: GridColDef<Supplier>[] = [
 
 export function SuppliersPage() {
   const auth = useAuth();
+  const { t } = useI18n();
   return (
     <EntityPage<Supplier>
-      title="Suppliers"
-      subtitle="Manage vendors used by purchase orders and product sourcing."
+      title={t("entities.suppliers")}
+      subtitle={t("entities.suppliersSubtitle")}
       endpoint="/suppliers"
       queryKey="suppliers"
       columns={columns}
       fields={fields}
-      createLabel="New supplier"
+      createLabel={t("entities.newSupplier")}
       canWrite={canManage(auth.roles)}
       defaultValues={{ companyName: "", contactName: "", email: "", phone: "", taxNumber: "", country: "", city: "", address: "", status: "ACTIVE" }}
       toFormValues={(row) => ({ ...row })}

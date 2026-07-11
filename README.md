@@ -12,6 +12,7 @@ The project models a realistic warehouse workflow:
 - create and receive purchase orders
 - create and ship sales orders
 - view KPIs, reports, and audit-friendly operational history
+- switch the interface between English, French, and Arabic
 
 The backend exposes a REST API under `/api/v1`, and the frontend consumes the real API rather than mock data.
 
@@ -32,8 +33,10 @@ The backend exposes a REST API under `/api/v1`, and the frontend consumes the re
 - Inventory tracking and stock movement history
 - Purchase order and sales order workflows
 - Reporting endpoints for inventory, low stock, purchases, sales, and stock movements
+- Styled CSV, Excel, and PDF report downloads
 - User management and settings
 - Responsive enterprise-style interface with dark and light mode
+- English, French, and Arabic interface support with RTL layout for Arabic
 
 ## Running With Docker
 
@@ -99,6 +102,16 @@ For a short product walkthrough:
 5. Create and receive a purchase order to increase stock.
 6. Create a customer and sales order, then ship it to reduce stock.
 7. Review stock movement history and reports.
+
+## Reports
+
+The reporting module exports operational data in three formats:
+
+- CSV for imports and quick data exchange
+- Excel for analysis, filtering, and formatted spreadsheets
+- PDF for readable sharing and review
+
+Reports are generated from the live Spring Boot API and include inventory valuation, low stock, purchase orders, sales orders, and stock movement history.
 
 ## API
 

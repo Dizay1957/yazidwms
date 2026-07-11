@@ -11,6 +11,7 @@ import { DataTableShell } from "../../components/DataTableShell";
 import { FormDialog, FormField, FormValues } from "../../components/FormDialog";
 import { PageHeader } from "../../components/PageHeader";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { useI18n } from "../../i18n/I18nProvider";
 
 export interface EntityPageConfig<T extends { id: number }> {
   title: string;
@@ -27,6 +28,7 @@ export interface EntityPageConfig<T extends { id: number }> {
 }
 
 export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>) {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -58,7 +60,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
     onSuccess: () => {
       setDialogOpen(false);
       setEditing(null);
-      setSnackbar(editing ? "Record updated" : "Record created");
+      setSnackbar(editing ? t("common.recordUpdated") : t("common.recordCreated"));
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     }
   });
@@ -67,7 +69,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
     mutationFn: (row: T) => deleteOne(config.endpoint, row.id),
     onSuccess: () => {
       setDeleteTarget(null);
-      setSnackbar("Record deleted");
+      setSnackbar(t("common.recordDeleted"));
       queryClient.invalidateQueries({ queryKey: [config.queryKey] });
     }
   });
@@ -86,7 +88,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
         filterable: false,
         renderCell: ({ row }) => (
           <Stack direction="row">
-            <Tooltip title="Edit">
+            <Tooltip title={t("common.edit")}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -97,7 +99,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
                 <EditOutlinedIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Delete">
+            <Tooltip title={t("common.delete")}>
               <IconButton size="small" color="error" onClick={() => setDeleteTarget(row)}>
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
@@ -106,7 +108,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
         )
       }
     ];
-  }, [config]);
+  }, [config, t]);
 
   const currentValues = editing ? config.toFormValues(editing) : config.defaultValues;
   const error = pageQuery.error ? apiMessage(pageQuery.error) : undefined;
@@ -117,7 +119,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
       <PageHeader
         title={config.title}
         subtitle={config.subtitle}
-        actionLabel={config.canWrite ? config.createLabel ?? "Create" : undefined}
+        actionLabel={config.canWrite ? config.createLabel ?? t("common.create") : undefined}
         onAction={() => {
           setEditing(null);
           setDialogOpen(true);
@@ -133,8 +135,8 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
         total={pageQuery.data?.totalElements ?? 0}
         paginationModel={paginationModel}
         search={search}
-        emptyTitle={`No ${config.title.toLowerCase()} found`}
-        emptyMessage="Create a new record or adjust the search filter."
+        emptyTitle={t("common.noRecords")}
+        emptyMessage={t("common.emptyAction")}
         onSearch={(value) => {
           setSearch(value);
           setPaginationModel((current) => ({ ...current, page: 0 }));
@@ -145,7 +147,7 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
 
       <FormDialog
         open={dialogOpen}
-        title={editing ? `Edit ${config.title}` : config.createLabel ?? `Create ${config.title}`}
+        title={editing ? `${t("common.edit")} ${config.title}` : config.createLabel ?? `${t("common.create")} ${config.title}`}
         fields={config.fields}
         initialValues={currentValues}
         loading={saveMutation.isPending}
@@ -158,8 +160,8 @@ export function EntityPage<T extends { id: number }>(config: EntityPageConfig<T>
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Delete record"
-        message="This will soft-delete the selected record in YazidWMS."
+        title={t("common.deleteRecord")}
+        message={t("common.deleteMessage")}
         loading={deleteMutation.isPending}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget)}
