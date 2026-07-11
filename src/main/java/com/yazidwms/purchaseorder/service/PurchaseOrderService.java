@@ -17,6 +17,7 @@ import com.yazidwms.security.SecurityUtils;
 import com.yazidwms.supplier.service.SupplierService;
 import com.yazidwms.warehouse.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public PurchaseOrderResponse create(PurchaseOrderRequest request) {
         if (purchaseOrderRepository.existsByOrderNumberIgnoreCase(request.orderNumber())) {
             throw new BusinessException("Purchase order number already exists");
@@ -85,6 +87,7 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public PurchaseOrderResponse confirm(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() != PurchaseOrderStatus.DRAFT) {
@@ -96,6 +99,7 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public PurchaseOrderResponse receive(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() == PurchaseOrderStatus.RECEIVED) {
@@ -114,6 +118,7 @@ public class PurchaseOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public PurchaseOrderResponse cancel(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() == PurchaseOrderStatus.RECEIVED) {

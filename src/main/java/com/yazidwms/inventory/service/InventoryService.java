@@ -18,6 +18,7 @@ import com.yazidwms.stockmovement.entity.StockMovementType;
 import com.yazidwms.stockmovement.repository.StockMovementRepository;
 import com.yazidwms.warehouse.entity.WarehouseBin;
 import com.yazidwms.warehouse.service.WarehouseService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public InventoryResponse adjust(InventoryAdjustmentRequest request) {
         var product = productService.findActive(request.productId());
         var bin = warehouseService.findBin(request.binId());
@@ -70,6 +72,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public void receive(Product product, WarehouseBin bin, int quantity, String reference) {
         var inventory = getOrCreate(product, bin);
         var previous = inventory.getQuantity();
@@ -79,6 +82,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public void issue(Product product, WarehouseBin bin, int quantity, String reference) {
         var inventory = getOrCreate(product, bin);
         if (inventory.getQuantity() < quantity) {
@@ -91,6 +95,7 @@ public class InventoryService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public void transfer(TransferRequest request) {
         var product = productService.findActive(request.productId());
         var from = warehouseService.findBin(request.fromBinId());

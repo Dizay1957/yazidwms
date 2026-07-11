@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +26,13 @@ public interface SalesOrderRepository extends JpaRepository<SalesOrder, Long> {
 
     @Query("select s.status, count(s) from SalesOrder s where s.deleted = false group by s.status")
     List<Object[]> countByStatusGrouped();
+
+    @Query("""
+            select year(s.createdAt), month(s.createdAt), coalesce(sum(s.totalAmount), 0)
+            from SalesOrder s
+            where s.deleted = false and s.createdAt >= :from
+            group by year(s.createdAt), month(s.createdAt)
+            order by year(s.createdAt), month(s.createdAt)
+            """)
+    List<Object[]> sumMonthlyTotals(@Param("from") Instant from);
 }

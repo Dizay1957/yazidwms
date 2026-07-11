@@ -17,6 +17,7 @@ import com.yazidwms.salesorder.repository.SalesOrderRepository;
 import com.yazidwms.security.SecurityUtils;
 import com.yazidwms.warehouse.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class SalesOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public SalesOrderResponse create(SalesOrderRequest request) {
         if (salesOrderRepository.existsByOrderNumberIgnoreCase(request.orderNumber())) {
             throw new BusinessException("Sales order number already exists");
@@ -85,6 +87,7 @@ public class SalesOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public SalesOrderResponse confirm(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() != SalesOrderStatus.DRAFT) {
@@ -101,6 +104,7 @@ public class SalesOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public SalesOrderResponse ship(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() == SalesOrderStatus.SHIPPED) {
@@ -119,6 +123,7 @@ public class SalesOrderService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public SalesOrderResponse cancel(Long id) {
         var order = findWithItems(id);
         if (order.getStatus() == SalesOrderStatus.SHIPPED) {

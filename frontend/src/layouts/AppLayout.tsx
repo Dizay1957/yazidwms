@@ -133,7 +133,7 @@ export function AppLayout({
   );
 
   return (
-    <Box sx={{ display: "flex", flexDirection: isRtl ? "row-reverse" : "row", minHeight: "100vh", bgcolor: "background.default" }}>
+    <Box sx={{ display: "flex", flexDirection: "row", minHeight: "100vh", bgcolor: "background.default" }}>
       <AppBar
         position="fixed"
         color="inherit"

@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.YearMonth;
+import java.time.ZoneOffset;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -44,6 +46,7 @@ public class DashboardService {
     @Cacheable("dashboard")
     @Transactional(readOnly = true)
     public DashboardResponse overview() {
+        var from = sixMonthWindowStart();
         return new DashboardResponse(
                 productRepository.countByDeletedFalse(),
                 warehouseRepository.countByDeletedFalse(),
@@ -68,9 +71,9 @@ public class DashboardService {
                 productRepository.findTop10ByDeletedFalseOrderByUpdatedAtDesc().stream()
                         .map(product -> Map.of("sku", product.getSku(), "name", product.getName(), "quantity", product.getQuantity()))
                         .toList(),
-                emptyMonthlyLong(),
-                emptyMonthlyMoney(),
-                emptyMonthlyMoney()
+                monthlyLong(stockMovementRepository.countMonthlyActivity(from)),
+                monthlyMoney(salesOrderRepository.sumMonthlyTotals(from)),
+                monthlyMoney(purchaseOrderRepository.sumMonthlyTotals(from))
         );
     }
 
@@ -94,5 +97,35 @@ public class DashboardService {
             map.put(YearMonth.now().minusMonths(i).toString(), BigDecimal.ZERO);
         }
         return map;
+    }
+
+    private Map<String, Long> monthlyLong(java.util.List<Object[]> rows) {
+        var map = emptyMonthlyLong();
+        rows.forEach(row -> map.put(monthKey(row), ((Number) row[2]).longValue()));
+        return map;
+    }
+
+    private Map<String, BigDecimal> monthlyMoney(java.util.List<Object[]> rows) {
+        var map = emptyMonthlyMoney();
+        rows.forEach(row -> map.put(monthKey(row), toBigDecimal(row[2])));
+        return map;
+    }
+
+    private String monthKey(Object[] row) {
+        return YearMonth.of(((Number) row[0]).intValue(), ((Number) row[1]).intValue()).toString();
+    }
+
+    private BigDecimal toBigDecimal(Object value) {
+        if (value instanceof BigDecimal decimal) {
+            return decimal;
+        }
+        if (value instanceof Number number) {
+            return BigDecimal.valueOf(number.doubleValue());
+        }
+        return BigDecimal.ZERO;
+    }
+
+    private Instant sixMonthWindowStart() {
+        return YearMonth.now().minusMonths(5).atDay(1).atStartOfDay().toInstant(ZoneOffset.UTC);
     }
 }

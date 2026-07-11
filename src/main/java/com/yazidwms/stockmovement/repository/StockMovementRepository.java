@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface StockMovementRepository extends JpaRepository<StockMovement, Long> {
@@ -19,6 +21,15 @@ public interface StockMovementRepository extends JpaRepository<StockMovement, Lo
 
     @Query("select m.type, count(m) from StockMovement m group by m.type")
     List<Object[]> countByType();
+
+    @Query("""
+            select year(m.timestamp), month(m.timestamp), count(m)
+            from StockMovement m
+            where m.deleted = false and m.timestamp >= :from
+            group by year(m.timestamp), month(m.timestamp)
+            order by year(m.timestamp), month(m.timestamp)
+            """)
+    List<Object[]> countMonthlyActivity(@Param("from") Instant from);
 
     long countByType(StockMovementType type);
 }
