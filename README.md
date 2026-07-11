@@ -10,9 +10,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
 
-<!-- Add dashboard screenshot here after capturing it:
 ![YazidWMS Dashboard](docs/screenshots/dashboard.png)
--->
 
 YazidWMS is a production-style warehouse and inventory management platform. It manages products, categories, suppliers, customers, warehouses, storage locations, inventory quantities, stock movements, purchase orders, sales orders, operational reports, authentication, role-based authorization, and audit-friendly history.
 
@@ -354,7 +352,7 @@ The current Docker Compose setup is designed for development and portfolio demon
 
 ## Screenshots
 
-Screenshots are not committed yet. See [docs/screenshots/README.md](docs/screenshots/README.md) for the capture checklist and file names.
+Screenshots are stored under `docs/screenshots/`. See [docs/screenshots/README.md](docs/screenshots/README.md) for the full capture checklist and naming convention.
 
 ## GitHub Setup
 
