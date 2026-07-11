@@ -1,0 +1,35 @@
+debug: false
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:yazidwms;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  mail:
+    host: localhost
+    port: 3025
+
+management:
+  health:
+    mail:
+      enabled: false
+
+app:
+  security:
+    jwt-secret: YazidWMS-Test-Secret-Key-Long-Enough-For-HS256-Testing
+    access-token-minutes: 15
+    refresh-token-days: 1
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
